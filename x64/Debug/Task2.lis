@@ -1,0 +1,188 @@
+X-Makina Assembler - Version XM-23P Single Pass+ Assembler - Release 02.04.17
+Input file name: Task2.asm
+Time of assembly: Mon 20 May 2024 15:32:54 
+  1	    	     	;
+  2	    	     	; Example X-Makina program
+  3	    	     	; Assembling two string functions (CalculateStringLength and CopyAndConvertString)
+  4	    	     	; Called by mainline
+  5	    	     	;
+  6	    	     	; L. Hughes
+  7	    	     	; Code edited and repurposed by
+  8	    	     	; Iftekhar Rafi
+  9	    	     	; B00871031
+ 10	    	     	;
+ 11	    	     	;
+ 12	    	     	STKTOP  equ     #FFC0   ; Stack top - PUSH (decr then write); PULL (read then incr)
+ 13	    	     	NUL     equ     #00     ; End-of-string indicator (NUL)
+ 14	    	     	DIFF    equ     #20     ; Difference between lower-case and upper-case
+ 15	    	     	
+ 16	    	     	; 
+ 17	    	     	r2      equ     R2      ; r2 is alias of R2
+ 18	    	     	LR      equ     R5      ; LR is alias of R5
+ 19	    	     	SP      equ     R6      ; SP is alias of R6 
+ 20	    	     	PC      equ     R7      ; PC is alias of R7
+ 21	    	     	;
+ 22	    	     	; Code space
+ 23	    	     	;
+ 24	    	     	        org     #1000
+ 25	    	     	Main
+ 26	    	     	;
+ 27	    	     	; Initialize stack point
+ 28	    	     	;
+ 29	1000	7606	        movls   STKTOP,SP       ; STKTOP.LSB to SP.LSB; $FF to SP.MSB
+ 30	    	     	;
+ 31	    	     	; R1 points to string
+ 32	    	     	;
+ 33	1002	6011	        movl    MyStr,R1
+ 34	1004	7981	        movh    MyStr,R1
+ 35	    	     	;
+ 36	    	     	; Call CalculateStringLength
+ 37	    	     	; R1 points to string
+ 38	    	     	; R0 returned with length
+ 39	    	     	;
+ 40	1006	0007	        bl      CalculateStringLength  
+ 41	    	     	;
+ 42	    	     	; Two examples of storing (R0, length, in MSLen):
+ 43	    	     	;
+ 44	    	     	; 1. Indexed using R1 (address of MyStr)
+ 45	    	     	;
+ 46	1008	4291	        sub     #2,R1   ; Word before MyStr is MSLen
+ 47	100A	5C81	        st.w    R0,R1+  ; Save R0 in MSLen
+ 48	    	     	                        ; Bit of a cheat - increment R1 by 2 to point 
+ 49	    	     	                        ; back to string MyStr
+ 50	    	     	;
+ 51	    	     	; 2. Relative using offset "back" from R1 to MSLen's location
+ 52	    	     	;
+ 53	100C	FF01	        str.w   R0,R1,$-2       ; mem[R1-2] = R0
+ 54	    	     	                                ; Note that R1 is unchanged
+ 55	    	     	;
+ 56	    	     	; Call CopyAndConvertString
+ 57	    	     	; MyStr (R1) to Str2 (r2)
+ 58	    	     	; Setup destination str in R2
+ 59	    	     	;
+ 60	100E	6082	        movl    Str2,r2
+ 61	1010	7982	        movh    Str2,r2
+ 62	    	     	;
+ 63	1012	07F6	        bl      CopyAndConvertString  ; LR holds return address
+ 64	    	     	;
+ 65	    	     	; No halt, loop until ^C
+ 66	    	     	;
+ 67	    	     	Done    
+ 68	1014	3FFF	        bra     Done
+ 69	    	     	;
+ 70	    	     	; String length function
+ 71	    	     	; Input: R1 - Address of NUL-terminated string
+ 72	    	     	; Returns: Length of string in R0
+ 73	    	     	;
+ 74	    	     	CalculateStringLength
+ 75	    	     	; 
+ 76	1016	5F0E	        st      R1,-SP  ; Push R1 (to restore on exit)
+ 77	1018	5F16	        st      R2,-SP  ; Push R2 (holds character read)
+ 78	101A	6800	        movlz   #0,R0   ; Return length in R0 (initially zero)
+ 79	    	     	;
+ 80	    	     	CalculateStringLengthLoop 
+ 81	101C	58CA	        ld.b    R1+,R2  ; Copy byte [R1] to R2 and R1 incremented by 1
+ 82	101E	45C2	        cmp.b   NUL,R2  ; Compare byte (in R2) with NUL
+ 83	1020	2002	        beq     CalculateStringLengthEnd ; If equal, go to end
+ 84	1022	4088	        add     #1,R0   ; R0 (length) incremented by 1
+ 85	1024	3FFB	        bra     CalculateStringLengthLoop ; Check next byte
+ 86	    	     	;
+ 87	    	     	; Finished
+ 88	    	     	;
+ 89	    	     	CalculateStringLengthEnd 
+ 90	1026	58B2	        ld      SP+,R2  ; Pull R2
+ 91	1028	58B1	        ld      SP+,R1  ; Pull R1
+ 92	102A	4C2F	        mov     LR,PC   ; Return to caller.  R0 has length
+ 93	    	     	;
+ 94	    	     	        org     #2000
+ 95	    	     	;
+ 96	    	     	; String copy and convert function
+ 97	    	     	; Input: R1 - src string; R2 - dst string
+ 98	    	     	; R0 holds char - stop when NUL
+ 99	    	     	; No check on length of dst string
+100	    	     	; Returns: nothing
+101	    	     	;
+102	    	     	CopyAndConvertString
+103	2000	5F06	        st      R0,-SP  ; Push R0
+104	2002	5F0E	        st      R1,-SP  ; Push R1
+105	2004	5F16	        st      R2,-SP  ; Push R2
+106	    	     	
+107	    	     	CopyAndConvertStringLoop
+108	2006	58C8	        ld.b    R1+,R0  ; Load byte from src to R0 and increment R1
+109	2008	45C0	        cmp.b   NUL,R0  ; Compare with NUL
+110	200A	2009	        beq     CopyAndConvertStringEnd ; If NUL, end loop
+111	    	     	
+112	200C	6B0B	        movlz   #61,R3  ; Load 'a' ASCII value into R3
+113	200E	4558	        cmp.b   R3,R0   ; Compare byte with 'a'
+114	2010	3804	        blt     NoConversionNeeded ; If less than 'a', no conversion needed
+115	    	     	
+116	2012	6BD3	        movlz   #7A,R3  ; Load 'z' ASCII value into R3
+117	2014	4558	        cmp.b   R3,R0   ; Compare byte with 'z'
+118	2016	3401	        bge     NoConversionNeeded ; If greater than or equal to 'z', no conversion needed
+119	    	     	
+120	2018	42F0	        sub.b   DIFF,R0 ; Convert to upper-case by subtracting 32
+121	    	     	
+122	    	     	NoConversionNeeded
+123	201A	5CC2	        st.b    R0,R2+  ; Store the byte to destination and increment R2
+124	201C	3FF4	        bra     CopyAndConvertStringLoop ; Repeat loop
+125	    	     	
+126	    	     	CopyAndConvertStringEnd
+127	201E	58B2	        ld      SP+,R2  ; Pull R2
+128	2020	58B1	        ld      SP+,R1  ; Pull R1
+129	2022	58B0	        ld      SP+,R0  ; Pull R0
+130	2024	4C2F	        mov     LR,PC   ; Return to caller
+131	    	     	;
+132	    	     	; Data space 
+133	    	     	; Setting the origin could be unsafe - if code addresses extend past $1000, they
+134	    	     	; could be overwritten by the data.  This is one argument for a linker.
+135	    	     	;
+136	    	     	        org     #3000
+137	    	     	;
+138	3000	0000	MSLen   bss     #2      ; Reserve 2 bytes (word) for length of MyStr
+139	    	     	;
+140	3002	6568	MyStr   ascii   "hello, world\n\0"
+140	3004	6C6C
+140	3006	2C6F
+140	3008	7720
+140	300A	726F
+140	300C	646C
+140	300E	000A
+141	    	     	;
+142	3010	0000	Str2    bss     $100    ; 100 bytes for destination string
+143	    	     	;
+144	    	     	        end     Main
+
+Successful completion of assembly - 2P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+MSLen                              	REL	3000	12288	PRI
+NoConversionNeeded                 	REL	201A	8218	PRI
+CopyAndConvertStringEnd            	REL	201E	8222	PRI
+CopyAndConvertStringLoop           	REL	2006	8198	PRI
+CalculateStringLengthEnd           	REL	1026	4134	PRI
+CalculateStringLengthLoop          	REL	101C	4124	PRI
+Done                               	REL	1014	4116	PRI
+CopyAndConvertString               	REL	2000	8192	PRI
+Str2                               	REL	3010	12304	PRI
+CalculateStringLength              	REL	1016	4118	PRI
+MyStr                              	REL	3002	12290	PRI
+Main                               	REL	1000	4096	PRI
+PC                                 	REG	0007	7	PRI
+SP                                 	REG	0006	6	PRI
+LR                                 	REG	0005	5	PRI
+r2                                 	REG	0002	2	PRI
+DIFF                               	CON	0020	32	PRI
+NUL                                	CON	0000	0	PRI
+STKTOP                             	CON	FFC0	-64	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\Decartes\Downloads\OneDrive_2024-05-16\Original Assembler and Machine (xm23)\Task2.xme
+

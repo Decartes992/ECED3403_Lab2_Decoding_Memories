@@ -1,0 +1,73 @@
+X-Makina Assembler - Version XM-23P Single Pass+ Assembler - Release 02.04.17
+Input file name: Add02.asm
+Time of assembly: Thu 23 May 2024 23:55:53 
+  1	    	     	;
+  2	    	     	; Addition examples
+  3	    	     	;
+  4	    	     	; ECED 3403
+  5	    	     	;  9 May 24 - Original
+  6	    	     	;
+  7	    	     		org	#1000
+  8	    	     	;
+  9	    	     	; Add a value to a register
+ 10	    	     	;
+ 11	    	     	Main
+ 12	1000	6878		movlz	$15,R0	; R0 <- 15
+ 13	1002	4088		add	#1,R0	; R0 <- R0 + constant 1
+ 14	    	     	;
+ 15	    	     	; Add two registers
+ 16	    	     	;
+ 17	1004	6F81		movlz	#F0,R1	; R0 <- #F0
+ 18	1006	4001		add	R0,R1	; R1 <- R1 + R0 (16 or #10)
+ 19	    	     	;
+ 20	    	     	; Load and store results from memory
+ 21	    	     	;
+ 22	    	     	; R1 <- address of InVal
+ 23	    	     	;
+ 24	1008	6501		movl	InVal,R1
+ 25	100A	7881		movh	InVal,R1
+ 26	    	     	;
+ 27	    	     	; Read InVal into R0
+ 28	    	     	;
+ 29	100C	5808		ld	R1,R0	; R0 <- mem[R1]
+ 30	    	     	;
+ 31	100E	4090		add	#2,R0	; R0 <- R0 + 2
+ 32	    	     	;
+ 33	    	     	; Write R0 to OutVal (InVal + 2)
+ 34	    	     	;
+ 35	1010	4091		add	#2,R1
+ 36	1012	5C01		st	R0,R1	; mem[R1] <- R0
+ 37	    	     	;
+ 38	    	     	; All done - busy wait for ^C
+ 39	    	     	;
+ 40	1014	3FFF	Done	bra	Done
+ 41	    	     	;
+ 42	    	     	; Data
+ 43	    	     	;
+ 44	    	     		org	#10a0
+ 45	    	     	;
+ 46	10A0	0FFE	InVal	word	#0FFE
+ 47	    	     	;
+ 48	10A2	0000	OutVal	bss	$2	; Reserve two bytes
+ 49	    	     	;
+ 50	    	     		end	Main	; Start of program (S9 record)
+
+Successful completion of assembly - 2P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+OutVal                             	REL	10A2	4258	PRI
+Done                               	REL	1014	4116	PRI
+InVal                              	REL	10A0	4256	PRI
+Main                               	REL	1000	4096	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\Decartes\Documents\GitHub\X-Makina-23P-Loader\cmake-build-debug\Add02.xme
+

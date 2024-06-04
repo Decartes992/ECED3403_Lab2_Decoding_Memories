@@ -1,0 +1,3 @@
+﻿  manager.c
+C:\Users\Decartes\Documents\GitHub\ECED3403_Lab2_Decoding_Memories\manager.c(21,18): warning C4098: 'manager': 'void' function returning a value
+  ECED3403_Lab2_Decoding_Memories.vcxproj -> C:\Users\Decartes\Documents\GitHub\ECED3403_Lab2_Decoding_Memories\x64\Debug\ECED3403_Lab2_Decoding_Memories.exe

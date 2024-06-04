@@ -1,0 +1,84 @@
+X-Makina Assembler - Version XM-23P Single Pass+ Assembler - Release 02.04.17
+Input file name: task-1.2.asm
+Time of assembly: Mon 20 May 2024 11:38:50 
+  1	    	     	;
+  2	    	     	; Sum an array of 16-bit numbers
+  3	    	     	;
+  4	    	     	; ECED 3403
+  5	    	     	; Name: Iftekhar Rafi
+  6	    	     	; ID: B00871031
+  7	    	     	;
+  8	    	     	; Date: 20 May 24
+  9	    	     	;
+ 10	    	     		org	#1000
+ 11	    	     	;
+ 12	    	     	; Initialize registers
+ 13	    	     	;
+ 14	    	     	Main
+ 15	1000	6800		movlz	#800,R0		; Load lower byte of base address of the array into R0
+ 16	1002	7840		movh	#800,R0		; Load upper byte of base address of the array into R0
+ 17	1004	5801		ld	R0,R1		; Load the limit value from the first word of the array into R1
+ 18	1006	6802		movlz	#0,R2		; Initialize sum to 0 in R2
+ 19	1008	6814		movlz	#2,R4		; Initialize index to 2 in R4 (points to the first number after the limit)
+ 20	    	     	;
+ 21	    	     	; Sum the array elements
+ 22	    	     	;
+ 23	    	     	SumLoop
+ 24	100A	5803		ld		R0,R3		; Load the current number from the array into R3
+ 25	100C	401A		add		R3,R2		; Add the current number to the sum in R2
+ 26	100E	4090		add		#2,R0		; Increment address in R0 to point to the next number
+ 27	1010	4521		cmp		R4,R1		; Compare the index in R4 with the limit in R1
+ 28	1012	2002		beq		Done		; If index >= limit, go to Done
+ 29	1014	4094		add		#2,R4		; Increment index by 2
+ 30	1016	3FF9		bra		SumLoop		; Repeat the loop
+ 31	    	     	;
+ 32	    	     	; Store the result
+ 33	    	     	;
+ 34	    	     	Done
+ 35	1018	6805		movlz	#900,R5		; Load lower byte of result address into R5
+ 36	101A	784D		movh	#900,R5		; Load upper byte of result address into R5
+ 37	101C	5C15		st		R2,R5		; Store the sum from R2 into the result address
+ 38	    	     	;
+ 39	    	     	; All done - busy wait for ^C
+ 40	    	     	;
+ 41	    	     	Wait
+ 42	101E	3FFF		bra		Wait
+ 43	    	     	;
+ 44	    	     	; Data
+ 45	    	     	;
+ 46	    	     		org	#0800
+ 47	    	     	;
+ 48	    	     	Array
+ 49	0800	0005		word	#0005		; Limit value
+ 50	0802	000A		word	#000A		; Array element 1 (10)
+ 51	0804	0014		word	#0014		; Array element 2 (20)
+ 52	0806	001E		word	#001E		; Array element 3 (30)
+ 53	0808	0028		word	#0028		; Array element 4 (40)
+ 54	080A	0032		word	#0032		; Array element 5 (50)
+ 55	    	     	;
+ 56	    	     	Sum
+ 57	080C	0000		word	#0000		; Memory location to store the sum
+ 58	    	     	;
+ 59	    	     		end	Main		; Start of program (S9 record)
+
+Successful completion of assembly - 2P
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Sum                                	REL	080C	2060	PRI
+Array                              	REL	0800	2048	PRI
+Wait                               	REL	101E	4126	PRI
+Done                               	REL	1018	4120	PRI
+SumLoop                            	REL	100A	4106	PRI
+Main                               	REL	1000	4096	PRI
+R7                                 	REG	0007	7	PRI
+R6                                 	REG	0006	6	PRI
+R5                                 	REG	0005	5	PRI
+R4                                 	REG	0004	4	PRI
+R3                                 	REG	0003	3	PRI
+R2                                 	REG	0002	2	PRI
+R1                                 	REG	0001	1	PRI
+R0                                 	REG	0000	0	PRI
+
+.XME file: C:\Users\Decartes\Downloads\OneDrive_2024-05-16\Original Assembler and Machine (xm23)\task-1.2.xme
+
